@@ -16,6 +16,8 @@ public class Trust implements Serializable {
 	private String regnNo;
 	private String regnDate;
 	private String treasurerName;
+	private String tax = "true";
+	
 	public String getName() {
 		return name;
 	}
@@ -59,10 +61,17 @@ public class Trust implements Serializable {
 		this.treasurerName = treasurerName;
 	}
 	
+	public String getTax() {
+		return tax;
+	}
+	public void setTax(String tax) {
+		this.tax = tax;
+	}
+	
 	@Override
 	public String toString() {
 		
 		return name+ "-"+ regnNo;
 	}
-	
+
 }

@@ -33,6 +33,7 @@ import com.sa.excel.ReadExcel;
 import com.sa.execl.vo.Receipt;
 import com.sa.execl.vo.Trust;
 import com.sa.pdf.PdfGenerator;
+import javax.swing.JCheckBox;
 
 public class MainWindow {
 
@@ -79,31 +80,10 @@ public class MainWindow {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		JLabel lblTitle = new JLabel("Generate Receipt");
-		lblTitle.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTitle.setBounds(254, 11, 141, 23);
-		frame.getContentPane().add(lblTitle);
-		
-		JComboBox<Trust> comboTrust = new JComboBox<Trust>();
-		loadTrustCombo(comboTrust);
-		comboTrust.setBounds(137, 77, 229, 33);
-		comboTrust.setEditable(false);
-		frame.getContentPane().add(comboTrust);
-		
-		JLabel lblTrust = new JLabel("Trust");
-		lblTrust.setFont(new Font("Tahoma", Font.BOLD, 12));
-		lblTrust.setBounds(10, 72, 125, 40);
-		frame.getContentPane().add(lblTrust);
-		
-		JButton btnAddTrust = new JButton("Add/Edit Trust");
-		btnAddTrust.setBounds(389, 77, 132, 33);
-		frame.getContentPane().add(btnAddTrust);
-		
 		JPanel panel = new JPanel();
-		panel.setVisible(false);
-		panel.setBounds(10, 417, 510, 294);
+		panel.setBounds(66, 77, 510, 327);
 		frame.getContentPane().add(panel);
+		panel.setVisible(false);
 		panel.setLayout(null);
 		
 		JLabel lblName = new JLabel("Name");
@@ -186,8 +166,39 @@ public class MainWindow {
 		lblAddeditTrust.setHorizontalAlignment(SwingConstants.CENTER);
 		panel.add(lblAddeditTrust);
 		
+		JLabel lblTaxExempt = new JLabel("Tax exempt");
+		lblTaxExempt.setBounds(27, 302, 67, 14);
+		panel.add(lblTaxExempt);
+		
+		JCheckBox checkBoxTax = new JCheckBox("");
+		checkBoxTax.setSelected(true);
+		checkBoxTax.setBounds(131, 290, 176, 29);
+		panel.add(checkBoxTax);
+		
+		
+		JLabel lblTitle = new JLabel("Generate Receipt");
+		lblTitle.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTitle.setBounds(254, 11, 141, 23);
+		frame.getContentPane().add(lblTitle);
+		
+		JComboBox<Trust> comboTrust = new JComboBox<Trust>();
+		loadTrustCombo(comboTrust);
+		comboTrust.setBounds(150, 77, 229, 33);
+		comboTrust.setEditable(false);
+		frame.getContentPane().add(comboTrust);
+		
+		JLabel lblTrust = new JLabel("Trust");
+		lblTrust.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblTrust.setBounds(10, 72, 125, 40);
+		frame.getContentPane().add(lblTrust);
+		
+		JButton btnAddTrust = new JButton("Add/Edit Trust");
+		btnAddTrust.setBounds(389, 77, 132, 33);
+		frame.getContentPane().add(btnAddTrust);
+		
 		JPanel panelGenerate = new JPanel();
-		panelGenerate.setBounds(10, 168, 612, 207);
+		panelGenerate.setBounds(10, 156, 612, 207);
 		frame.getContentPane().add(panelGenerate);
 		panelGenerate.setLayout(null);
 		
@@ -274,11 +285,13 @@ public class MainWindow {
 					protected Integer doInBackground() throws Exception {
 						Trust trust= (Trust)comboTrust.getSelectedItem();
 						List<Receipt> receipts;
+						final String FS = System.getProperty("file.separator");
 						try {
 							receipts = ReadExcel.readXLSXFile(textFileName.getText(), trust ,skipRows);
 							for (Iterator<Receipt> iterator = receipts.iterator(); iterator.hasNext();) {
 								Receipt receipt = (Receipt) iterator.next();
-								PdfGenerator.generate(receipt, textOutFolder.getText() + System.getProperty("file.separator"));
+								PdfGenerator.generate(receipt, textOutFolder.getText() + FS ,true);
+								PdfGenerator.generate(receipt, textOutFolder.getText() + FS + "duplicate" +FS,false);
 								count++;
 								val = (count * 100)/receipts.size()  ;
 								setProgress( val);
@@ -331,7 +344,7 @@ public class MainWindow {
 		
 		btnAddTrust.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.setBounds(62, 121, 510, 294);
+				panel.setBounds(66, 77, 510, 327);
 				panel.setVisible(true);
 				panelGenerate.setVisible(false);
 				btnAddTrust.setEnabled(false);
@@ -345,6 +358,11 @@ public class MainWindow {
 					textAreaAddr.setText(t.getAddress());
 					textPhone.setText(t.getPhone());
 					textTreasurer.setText(t.getTreasurerName());
+					if(t.getTax().equals("true")){
+						checkBoxTax.setSelected(true);
+					}else{
+						checkBoxTax.setSelected(false);
+					}
 					btnDelete.setEnabled(true);
 					btnAdd.setText("Save");
 				}else{
@@ -355,6 +373,7 @@ public class MainWindow {
 					textAreaAddr.setText("");
 					textPhone.setText("");
 					textTreasurer.setText("");
+					checkBoxTax.setSelected(true);
 					btnAdd.setText("Add");
 				}
 			}
@@ -407,12 +426,14 @@ public class MainWindow {
 				t.setAddress(textAreaAddr.getText());
 				t.setPhone(textPhone.getText());
 				t.setTreasurerName(textTreasurer.getText());
+				t.setTax(String.valueOf(checkBoxTax.isSelected()));
 				if(skipAdd){comboTrust.addItem(t);}
 				comboTrust.setEditable(false);
 				TrustUtil.save(comboTrust);
 				btnCancel.doClick();
 			}
 		});
+		
 	}
 
 	

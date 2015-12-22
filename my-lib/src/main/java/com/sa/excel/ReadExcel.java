@@ -36,12 +36,14 @@ public class ReadExcel {
 		boolean skipFirst = true;
 		while (rows.hasNext()) {
 			row = (XSSFRow) rows.next();
-			if (skipFirst) {
+			
+			if(skipRows > 0){
+				skipRows--;
 				skipFirst = false;
 				continue;
 			}
-			if(skipRows >= 0){
-				skipRows--;
+			if (skipFirst) {
+				skipFirst = false;
 				continue;
 			}
 			Iterator<Cell> cells = row.cellIterator();
