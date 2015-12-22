@@ -5,3 +5,4 @@ githubkey.txt
 trust.txt
 product/trust.txt
 .gradle/*
+*/build/
