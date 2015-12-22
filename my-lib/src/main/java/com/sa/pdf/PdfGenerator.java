@@ -12,7 +12,12 @@ import com.sa.execl.vo.Receipt;
 import com.sa.number.NumberToWords;
 
 public class PdfGenerator {
-	public static void generate(Receipt receipt,String outPath) throws IOException, FileNotFoundException, DocumentException {
+	
+	private static String TAX_LINE1 = "Income Tax Exemption Under 80G";
+	private static String TAX_LINE2 = "DIT [E] No:2(239)/13-14; Dt:07/08/2014";
+	
+	public static void generate(Receipt receipt,String outPath, Boolean original) 
+			throws IOException, FileNotFoundException, DocumentException {
 		File file = new File(outPath);
 		if(!file.exists()){
 			file.mkdirs();
@@ -22,6 +27,11 @@ public class PdfGenerator {
 				"Receipt-"+receipt.getReceiptNo() +".pdf");
 		PdfStamper stamper = new PdfStamper(pdfTemplate, fileOutputStream);
 		stamper.setFormFlattening(true);
+		if(original){
+			stamper.getAcroFields().setField("original", "Original");
+		}else{
+			stamper.getAcroFields().setField("original", "Duplicate");
+		}
 		stamper.getAcroFields().setField("trust_name", receipt.getTrust().getName());
 		stamper.getAcroFields().setField("trust_addr", receipt.getTrust().getAddress());
 		stamper.getAcroFields().setField("pan", receipt.getTrust().getPan());
@@ -29,7 +39,6 @@ public class PdfGenerator {
 		stamper.getAcroFields().setField("regndt", receipt.getTrust().getRegnDate());
 		stamper.getAcroFields().setField("regnno", receipt.getTrust().getRegnNo());
 		stamper.getAcroFields().setField("trust_phone", receipt.getTrust().getPhone());
-		stamper.getAcroFields().setField("book_no", String.valueOf( (receipt.getReceiptNo() / 100)+1 ));
 		stamper.getAcroFields().setField("receipt_no", String.valueOf( receipt.getReceiptNo()) );
 		stamper.getAcroFields().setField("date", receipt.getDate());
 		stamper.getAcroFields().setField("name", receipt.getName());
@@ -42,6 +51,10 @@ public class PdfGenerator {
 		stamper.getAcroFields().setField("cheque", receipt.getChequeDetails());
 		stamper.getAcroFields().setField("trust_name_2", receipt.getTrust().getName());
 		stamper.getAcroFields().setField("treasurer", receipt.getTrust().getTreasurerName());
+		if(receipt.getTrust().getTax().equalsIgnoreCase("true")){
+			stamper.getAcroFields().setField("tax_line1", TAX_LINE1);
+			stamper.getAcroFields().setField("tax_line2", TAX_LINE2);
+		}
 		
 		stamper.close();
 		pdfTemplate.close();

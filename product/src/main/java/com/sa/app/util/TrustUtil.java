@@ -33,7 +33,8 @@ public class TrustUtil {
 				newTrust.setRegnDate(trust[3]);
 				newTrust.setPhone(trust[4]);
 				newTrust.setTreasurerName(trust[5]);
-				newTrust.setAddress(trust[6]);
+				newTrust.setTax(trust[6]);
+				newTrust.setAddress(trust[7]);
 				data.add(newTrust);
 			}
 		}catch(Exception e){
@@ -48,7 +49,6 @@ public class TrustUtil {
 			if(fr != null) {try {
 				fr.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}}
 		}
@@ -69,15 +69,17 @@ public class TrustUtil {
 				.append("|")
 				.append(trust.getRegnNo())
 				.append("|")
-				.append(emptyOnNull(trust.getPan()))
+				.append(nullToEmpty(trust.getPan()))
 				.append("|")
-				.append(emptyOnNull(trust.getRegnDate()))
+				.append(nullToEmpty(trust.getRegnDate()))
 				.append("|")
-				.append(emptyOnNull(trust.getPhone()))
+				.append(nullToEmpty(trust.getPhone()))
 				.append("|")
-				.append(emptyOnNull(trust.getTreasurerName()))
+				.append(nullToEmpty(trust.getTreasurerName()))
 				.append("|")
-				.append(emptyOnNull(trust.getAddress()));
+				.append(nullToEmpty(trust.getTax()))
+				.append("|")
+				.append(nullToEmpty(trust.getAddress()));
 				bw.write(Base64.encodeBase64String(sb.toString().getBytes()));
 				bw.newLine();
 				sb.delete(0, sb.length());
@@ -99,7 +101,7 @@ public class TrustUtil {
 		}
 	}
 
-	private static String emptyOnNull(String str) {
+	private static String nullToEmpty(String str) {
 		return str == null ? " " : str;
 	}
 }
