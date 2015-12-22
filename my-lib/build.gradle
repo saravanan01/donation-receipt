@@ -1,0 +1,8 @@
+dependencies {
+	compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+	compile 'org.apache.poi:poi:3.13'
+	compile 'org.apache.poi:poi-ooxml:3.13'
+	compile 'com.lowagie:itext:4.2.1'
+	compile 'commons-codec:commons-codec:1.10'
+	compile 'commons-lang:commons-lang:2.6'
+}
