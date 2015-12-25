@@ -12,6 +12,8 @@ import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -25,12 +27,14 @@ public class ReadExcel {
 
 	public static List<Receipt> readXLSXFile(String filename,Trust trust, int skipRows) {
 		XSSFWorkbook wb = null;
+		FormulaEvaluator evaluator = null;
 		int colNbr = 0;
 		int rowNbr = 0;
 		List<Receipt> donations = new ArrayList<>(100);
 		try{
 			InputStream ExcelFileToRead = new FileInputStream(filename);
 			wb = new XSSFWorkbook(ExcelFileToRead);
+			evaluator = wb.getCreationHelper().createFormulaEvaluator();
 			XSSFSheet sheet = wb.getSheetAt(0);
 			XSSFRow row;  
 			XSSFCell cell;
@@ -80,7 +84,7 @@ public class ReadExcel {
 						receipt.setDescription(getString(cell));
 						break;
 					case 3:
-						receipt.setReceiptNo(Long.parseLong(getLongStr(cell)));
+						receipt.setReceiptNo(Long.parseLong(getLongStr(cell,evaluator)));
 						break;
 					case 4:
 						receipt.setName(getString(cell));
@@ -93,8 +97,8 @@ public class ReadExcel {
 						break;
 					case 7:
 						try {
-							if (getLongStr(cell) != null) {
-								receipt.setCredit(new BigDecimal(getLongStr(cell)));
+							if (getLongStr(cell,evaluator) != null) {
+								receipt.setCredit(new BigDecimal(getLongStr(cell,evaluator)));
 							}
 						} catch (Exception e) {
 							System.err.println("invalid credit");
@@ -102,8 +106,8 @@ public class ReadExcel {
 						break;
 					case 8:
 						try {
-							if (getLongStr(cell) != null) {
-								receipt.setDebit(new BigDecimal(getLongStr(cell)));
+							if (getLongStr(cell,evaluator) != null) {
+								receipt.setDebit(new BigDecimal(getLongStr(cell,evaluator)));
 							}
 						} catch (Exception e) {
 							System.err.println("invalid debit");
@@ -150,12 +154,14 @@ public class ReadExcel {
 		return donations;
 
 	}
-
-	private static String getLongStr(XSSFCell cell) {
+	private static final DecimalFormat df = new DecimalFormat("0000000000000");
+	private static String getLongStr(XSSFCell cell,FormulaEvaluator evaluator) {
 		String cellTxt = null;
 		if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC) {
-			DecimalFormat df = new DecimalFormat("0000000000000");
 			cellTxt = df.format(cell.getNumericCellValue());
+		}else if (cell.getCellType() == XSSFCell.CELL_TYPE_FORMULA){
+			CellValue cellValue = evaluator.evaluate(cell);
+			cellTxt = df.format(cellValue.getNumberValue());
 		}
 		return cellTxt;
 	}
