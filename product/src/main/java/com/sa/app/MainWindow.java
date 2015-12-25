@@ -280,6 +280,7 @@ public class MainWindow {
 				progressBar.setValue(0);
 				SwingWorker<Integer, Integer> workerTask = new SwingWorker<Integer, Integer>(){
 					int count = 0;
+					long recNo = 0;
 					int val = 0;
 					@Override
 					protected Integer doInBackground() throws Exception {
@@ -290,6 +291,7 @@ public class MainWindow {
 							receipts = ReadExcel.readXLSXFile(textFileName.getText(), trust ,skipRows);
 							for (Iterator<Receipt> iterator = receipts.iterator(); iterator.hasNext();) {
 								Receipt receipt = (Receipt) iterator.next();
+								recNo= receipt.getReceiptNo();
 								PdfGenerator.generate(receipt, textOutFolder.getText() + FS ,true);
 								PdfGenerator.generate(receipt, textOutFolder.getText() + FS + "duplicate" +FS,false);
 								count++;
@@ -302,7 +304,12 @@ public class MainWindow {
 							e1.printStackTrace();
 						} catch (DocumentException e1) {
 							e1.printStackTrace();
-						} finally {
+						}catch (Exception e2) {
+							JOptionPane.showConfirmDialog(null, "Failed to generate pdf for receipt no"+ recNo
+									,"Error",JOptionPane.DEFAULT_OPTION,JOptionPane.ERROR_MESSAGE);
+							e2.printStackTrace();
+						} 
+						finally {
 							btnGeneratePdfs.setEnabled(true);
 						}						
 						return new Integer(val);
